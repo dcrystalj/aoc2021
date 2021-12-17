@@ -1,7 +1,8 @@
 package registrator
 
-import "fmt"
-
+import (
+	"fmt"
+)
 
 var register map[string]func([]string) string
 
