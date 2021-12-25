@@ -11,6 +11,13 @@ func AbsDiffInt(x, y int) int {
 	return x - y
 }
 
+func AbsDiffInt64(x, y int) int64 {
+	if x < y {
+		return int64(y - x)
+	}
+	return int64(x - y)
+}
+
 func MaxInt(x, y int) int {
 	if x > y {
 		return x

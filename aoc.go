@@ -16,7 +16,14 @@ import (
 	_ "github.com/dcrystalj/aoc2021/day16"
 	_ "github.com/dcrystalj/aoc2021/day17"
 	_ "github.com/dcrystalj/aoc2021/day18"
+	_ "github.com/dcrystalj/aoc2021/day19"
 	_ "github.com/dcrystalj/aoc2021/day2"
+	_ "github.com/dcrystalj/aoc2021/day20"
+	_ "github.com/dcrystalj/aoc2021/day21"
+	_ "github.com/dcrystalj/aoc2021/day22"
+	_ "github.com/dcrystalj/aoc2021/day23"
+	_ "github.com/dcrystalj/aoc2021/day24"
+	_ "github.com/dcrystalj/aoc2021/day25"
 	_ "github.com/dcrystalj/aoc2021/day3"
 	_ "github.com/dcrystalj/aoc2021/day4"
 	_ "github.com/dcrystalj/aoc2021/day5"
@@ -29,7 +36,7 @@ import (
 
 func main() {
 	fmt.Println(os.Args)
-	day := os.Args[1][:5]
+	day := strings.Split(os.Args[1][:5], ".")[0]
 	fmt.Println("./" + day + "/" + os.Args[2])
 	contents, _ := ioutil.ReadFile("./" + day + "/" + os.Args[2])
 	lines := strings.Split(string(contents), "\n")

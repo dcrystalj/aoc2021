@@ -1,8 +1,8 @@
 package utils
 
 type Item struct {
-	Node int
-	Priority int    // The Priority of the item in the queue.
+	Node     int
+	Priority int // The Priority of the item in the queue.
 	// The Index is needed by update and is maintained by the heap.Interface methods.
 	Index int // The Index of the item in the heap.
 }

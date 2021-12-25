@@ -2,7 +2,6 @@ package day15
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 
 	"container/heap"
@@ -13,12 +12,13 @@ import (
 )
 
 func init() {
-	registrator.Register("day15.1", Solve)
-	registrator.Register("day15.2", Solve2)
+	registrator.Register("day15.1", Solve3)
+	registrator.Register("day15.2", Solve4)
 }
 
 type Grid [][]int
 
+// invalid. it can move to all directions, still passed test
 func Solve(lines []string) string {
 	nrows := len(lines)
 	ncols := len(lines[0])
@@ -27,7 +27,8 @@ func Solve(lines []string) string {
 	return strconv.Itoa(solveDp(dp, g, nrows, ncols))
 }
 
-func Solve3(lines []string) string {
+// second part using graph lib
+func Solve2(lines []string) string {
 	nrows := len(lines)
 	ncols := len(lines[0])
 	g := createGrid2(lines, nrows, ncols)
@@ -35,7 +36,15 @@ func Solve3(lines []string) string {
 	return strconv.Itoa(length)
 }
 
-func Solve2(lines []string) string {
+func Solve3(lines []string) string {
+	nrows := len(lines)
+	ncols := len(lines[0])
+	g := createGrid(lines)
+	length := dijkstra(g, nrows, ncols)
+	return strconv.Itoa(length)
+}
+
+func Solve4(lines []string) string {
 	nrows := len(lines)
 	ncols := len(lines[0])
 	g := createGrid2(lines, nrows, ncols)
@@ -84,7 +93,6 @@ func solveDp(dp *Grid, g *Grid, nrows, ncols int) int {
 	return (*dp)[nrows-1][ncols-1] - (*g)[0][0]
 }
 
-
 func createGrid2(lines []string, nrows, ncols int) *Grid {
 	g := *createGrid(lines)
 	for i := 1; i < 5; i++ {
@@ -93,7 +101,7 @@ func createGrid2(lines []string, nrows, ncols int) *Grid {
 			for ncol := 0; ncol < ncols; ncol++ {
 				newVal := (g)[nrow][ncol] + i
 				if newVal > 9 {
-					newVal = newVal % 10 + 1
+					newVal = newVal%10 + 1
 				}
 				(g)[len(g)-1] = append((g)[len(g)-1], newVal)
 			}
@@ -105,66 +113,59 @@ func createGrid2(lines []string, nrows, ncols int) *Grid {
 			for j := 0; j < ncols; j++ {
 				newVal := g[i][j] + k
 				if newVal > 9 {
-					newVal = newVal % 10 + 1
+					newVal = newVal%10 + 1
 				}
 				g[i] = append(g[i], newVal)
 			}
 		}
 	}
-	fmt.Println(len(g), len(g[0]))
 	return &g
 }
 
 type Loc [2]int
 
 func encode(row, col, nrows int) int {
-	return row * nrows + col
+	return row*nrows + col
 }
 
 func dijkstra(g *Grid, nrows, ncols int) int {
 	visited := make([]bool, nrows*ncols)
-	cost := make([]int, nrows*ncols)
-	for i := 1; i < nrows*ncols; i++ {
-		cost[i] = math.MaxInt
-	}
-	pq :=  make(utils.PriorityQueue, 0)
+	pq := utils.PriorityQueue{&utils.Item{Node: 0, Priority: 0, Index: 0}}
 	heap.Init(&pq)
-	heap.Push(&pq, &utils.Item{0, 0, 0})
 	directions := [][]int{{0, 1}, {1, 0}, {-1, 0}, {0, -1}}
 	for pq.Len() > 0 {
 		head := heap.Pop(&pq).(*utils.Item)
 
 		headRow, headCol := decode(head.Node, ncols)
-		headPos := encode(headRow, headCol, nrows)
-		visited[headPos] = true
+		if visited[head.Node] {
+			continue
+		}
+		if headRow == nrows-1 && headCol == ncols-1 {
+			return head.Priority
+		}
+		visited[head.Node] = true
 
-		for _, direction := range directions { // change to edges (calc uprfront)
-			newx := headRow + direction[0]
-			newy := headCol + direction[1]
+		for _, direction := range directions {
+			newy := headRow + direction[0]
+			newx := headCol + direction[1]
 			newPos := encode(newy, newx, nrows)
 			if 0 <= newx && newx < ncols && 0 <= newy && newy < nrows && !visited[newPos] {
-				old_cost := cost[newPos]
-				new_cost := cost[headPos] + (*g)[newy][newx]
-				if new_cost < old_cost {
-					cost[newPos] = new_cost
-					heap.Push(&pq, &utils.Item{newPos, new_cost, 0})
-				}
+				heap.Push(&pq, &utils.Item{newPos, head.Priority + (*g)[newy][newx], 0})
 			}
-
 		}
 	}
-	return cost[encode(nrows-1, ncols-1, nrows)]
+	panic("Path not found")
 }
 
-func (l *Loc) encode(ncols  int) int {
-	return l[0] * ncols + l[1]
+func (l *Loc) encode(ncols int) int {
+	return l[0]*ncols + l[1]
 }
 
 func decode(l int, ncols int) (int, int) {
-	return l / ncols, l%ncols
+	return l / ncols, l % ncols
 }
 
-func createGraph(g *Grid, nrows, ncols  int) (int) {
+func createGraph(g *Grid, nrows, ncols int) int {
 	gg := graph.New(nrows * ncols)
 	directions := [][]int{{0, 1}, {1, 0}, {-1, 0}, {0, -1}}
 	for i := 0; i < nrows; i++ {
@@ -179,6 +180,6 @@ func createGraph(g *Grid, nrows, ncols  int) (int) {
 			}
 		}
 	}
-	_, dist :=  graph.ShortestPath(gg, 0, (&Loc{nrows-1, ncols-1}).encode(ncols))
+	_, dist := graph.ShortestPath(gg, 0, (&Loc{nrows - 1, ncols - 1}).encode(ncols))
 	return int(dist)
 }
